@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
-import { lowStockItemsData } from '../../data/dashboard/MOCK__MANAGER_DASHBOARD';
+import { type LowStockItem } from '../../types/dashboard/manager';
 
-const LowStockAlert: React.FC = () => {
+const LowStockAlert = ({ items }: { items: LowStockItem[] }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  const totalEntries = lowStockItemsData.length;
+  const totalEntries = items.length;
   const totalPages = Math.ceil(totalEntries / itemsPerPage);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = lowStockItemsData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);

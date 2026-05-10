@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Activity, CheckCircle } from 'lucide-react';
-import { recentActivitiesData } from '../../../data/dashboard/MOCK_STAFF_DASHBOARD';
+import { type RecentActivity } from '../../../types/dashboard/staff';
 
-const StaffRecentActivities: React.FC = () => {
+const StaffRecentActivities = ({ activities }: { activities: RecentActivity[] }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
-  const totalEntries = recentActivitiesData.length;
+  const totalEntries = activities.length;
   const totalPages = Math.ceil(totalEntries / itemsPerPage);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = recentActivitiesData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = activities.slice(indexOfFirstItem, indexOfLastItem);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);

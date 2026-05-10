@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TrendingUp, ArrowUpRight, ArrowDownRight, Package } from 'lucide-react';
-import { topProductsData } from '../../../data/dashboard/MOCK__MANAGER_DASHBOARD';
+import { type YearlyTopProducts } from '../../../types/dashboard/manager';
 
-const TopProducts = () => {
-  const [selectedYear, setSelectedYear] = useState<number>(topProductsData[topProductsData.length - 1].year);
-  const yearData = topProductsData.find(d => d.year === selectedYear);
+const TopProducts = ({ topProductsByYear }: { topProductsByYear: YearlyTopProducts[] }) => {
+  const fallbackYear = topProductsByYear[topProductsByYear.length - 1];
+  const [selectedYear, setSelectedYear] = useState<number>(fallbackYear?.year ?? new Date().getFullYear());
+  const yearData = topProductsByYear.find(d => d.year === selectedYear) ?? fallbackYear;
   const [selectedMonth, setSelectedMonth] = useState<number>(yearData?.months[yearData.months.length - 1].month || 1);
 
   const currentMonthData = yearData?.months.find(m => m.month === selectedMonth);
@@ -27,6 +28,13 @@ const TopProducts = () => {
     if (currentPage > 1) setCurrentPage(prev => prev - 1);
   };
 
+  useEffect(() => {
+    if (!yearData) return;
+    if (!yearData.months.some((month) => month.month === selectedMonth)) {
+      setSelectedMonth(yearData.months[yearData.months.length - 1]?.month ?? 1);
+    }
+  }, [selectedMonth, yearData]);
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col min-h-[500px] overflow-hidden">
       <div className="p-6 flex-1">
@@ -42,7 +50,7 @@ const TopProducts = () => {
                   setCurrentPage(1);
                 }}
               >
-                {topProductsData.map(item => <option key={item.year} value={item.year}>Year {item.year}</option>)}
+                {topProductsByYear.map(item => <option key={item.year} value={item.year}>Year {item.year}</option>)}
               </select>
               <select 
                 className="text-lg border border-gray-300 rounded-xl px-2 p-1" 
@@ -52,7 +60,7 @@ const TopProducts = () => {
                   setCurrentPage(1);
                 }}
               >
-                {[1,2,3,4,5,6,7,8,9,10,11,12].map(m => <option key={m} value={m}>Month {m}</option>)}
+                {(yearData?.months ?? []).map(m => <option key={m.month} value={m.month}>Month {m.month}</option>)}
               </select>
             </div>
           </div>

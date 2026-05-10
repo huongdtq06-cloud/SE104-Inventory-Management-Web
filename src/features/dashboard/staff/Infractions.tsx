@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ShieldAlert, Calendar } from 'lucide-react';
-import { infractionsData } from '../../../data/dashboard/MOCK_STAFF_DASHBOARD';
+import { type Infraction } from '../../../types/dashboard/staff';
 
-const Infractions: React.FC = () => {
+const Infractions = ({ infractions }: { infractions: Infraction[] }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
-  const totalEntries = infractionsData.length;
+  const totalEntries = infractions.length;
   const totalPages = Math.ceil(totalEntries / itemsPerPage);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = infractionsData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = infractions.slice(indexOfFirstItem, indexOfLastItem);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage(prev => prev + 1);

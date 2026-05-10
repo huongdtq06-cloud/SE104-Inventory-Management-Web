@@ -1,9 +1,8 @@
-import React from 'react';
 import { PieChart as RePieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { PieChart as PieIcon } from 'lucide-react';
-import { productCategoryData } from '../../../data/dashboard/MOCK__MANAGER_DASHBOARD';
+import { type ProductCategory } from '../../../types/dashboard/manager';
 
-const ProductCategoryChart: React.FC = () => {
+const ProductCategoryChart = ({ categories }: { categories: ProductCategory[] }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full">
       <div className="flex items-center justify-between mb-6">
@@ -17,7 +16,7 @@ const ProductCategoryChart: React.FC = () => {
         <ResponsiveContainer width="50%" height={240}>
           <RePieChart>
             <Pie
-              data={productCategoryData}
+              data={categories}
               cx="50%"
               cy="50%"
               innerRadius={60}
@@ -25,7 +24,7 @@ const ProductCategoryChart: React.FC = () => {
               paddingAngle={5}
               dataKey="value"
             >
-              {productCategoryData.map((entry: any, index: number) => (
+              {categories.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
@@ -33,7 +32,7 @@ const ProductCategoryChart: React.FC = () => {
           </RePieChart>
         </ResponsiveContainer>
         <div className="flex-1 space-y-3 ml-4">
-          {productCategoryData.map((category: any, index: number) => (
+          {categories.map((category, index) => (
             <div key={index} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }}></div>

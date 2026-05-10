@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Activity, Handshake, Contact2, ShieldAlert } from 'lucide-react';
-import { RecentActivitiesData } from '../../../data/dashboard/MOCK__MANAGER_DASHBOARD';
+import { type RecentActivity } from '../../../types/dashboard/manager';
 
-const RecentActivities: React.FC = () => {
+const RecentActivities = ({ activities }: { activities: RecentActivity[] }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
-  const totalEntries = RecentActivitiesData.length;
+  const totalEntries = activities.length;
   const totalPages = Math.ceil(totalEntries / itemsPerPage);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = RecentActivitiesData.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = activities.slice(indexOfFirstItem, indexOfLastItem);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);

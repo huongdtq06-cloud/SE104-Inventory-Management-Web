@@ -29,3 +29,14 @@ export interface WorkSchedule {
   shift: string;
   note: string;
 }
+
+export type NoteStatus = 'COMPLETED' | 'PENDING' | 'REJECTED';
+
+export interface NoteEntry {
+  id: string;
+  noteNumber: string;
+  type: 'Inventory Check' | 'Delivery Note' | 'Good Receipts';
+  createdDate: string;
+  status: NoteStatus;
+  reason?: string;
+}

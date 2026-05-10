@@ -1,7 +1,6 @@
-import { Clock } from 'lucide-react';
 import { ShiftCalendarItem } from './ShiftCalendarItem';
-import { type Shift, type ShiftFormData } from '../../types/shift';
-import { useShifts } from '../../hooks/useShifts';
+import { type Shift } from '../../types/shift';
+import { useShiftCalendar } from '../../hooks/useShifts';
 
 interface Props {
   shifts: Shift[];
@@ -12,7 +11,7 @@ interface Props {
 const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const ShiftsCalendar = ({shifts, onOpenEditModal, onDelete,}: Props) => {
-    const {weekDates, goToToday, goToNextWeek, goToPreviousWeek} = useShifts();
+    const {weekDates, goToToday, goToNextWeek, goToPreviousWeek} = useShiftCalendar();
 
     return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -62,6 +61,7 @@ const ShiftsCalendar = ({shifts, onOpenEditModal, onDelete,}: Props) => {
               <div className="space-y-2">
                   {dayShifts.map((shift) => (
                     <ShiftCalendarItem
+                      key={shift.id}
                       shift={shift} onDelete={onDelete} onOpenEditModal={onOpenEditModal}>
 
                     </ShiftCalendarItem>

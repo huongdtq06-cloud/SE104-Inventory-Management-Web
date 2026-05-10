@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { BarChart3 } from 'lucide-react';
-import { managerRevenueData } from '../../../data/dashboard/MOCK__MANAGER_DASHBOARD';
+import { type YearlyRevenueData } from '../../../types/dashboard/manager';
 
-const RevenueChart = () => {
-  const [selectedYear, setSelectedYear] = useState<number>(managerRevenueData[managerRevenueData.length - 1].year);
-  const revenue = managerRevenueData.find(item => item.year === selectedYear);
+const RevenueChart = ({ revenueByYear }: { revenueByYear: YearlyRevenueData[] }) => {
+  //const [selectedYear, setSelectedYear] = useState<number>(revenueByYear[revenueByYear.length - 1]?.year ?? new Date().getFullYear());
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const revenue = revenueByYear.find(item => item.year === selectedYear) ?? revenueByYear[0]; 
+
+  useEffect(() => {
+    if (revenueByYear.length > 0 && !revenueByYear.some((item) => item.year === selectedYear)) {
+      setSelectedYear(new Date().getFullYear());
+    }
+  }, [revenueByYear, selectedYear]);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-full">
@@ -17,7 +24,7 @@ const RevenueChart = () => {
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
             className="text-lg border border-gray-300 rounded-xl px-2 p-1"
           >
-            {managerRevenueData.map((item) => (
+            {revenueByYear.map((item) => (
               <option key={item.year} value={item.year}>Year {item.year}</option>
             ))}
           </select>
@@ -25,7 +32,7 @@ const RevenueChart = () => {
         <BarChart3 className="w-5 h-5 text-gray-400" />
       </div>
       <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={revenue?.data}>
+        <AreaChart data={revenue?.data ?? []}>
           <defs>
             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
