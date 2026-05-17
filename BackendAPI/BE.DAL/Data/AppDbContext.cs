@@ -1,0 +1,78 @@
+using BackendAPI.BE.DAL.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+namespace BackendAPI.BE.DAL.Data;
+
+public class AppDbContext : DbContext
+{ // gọi constructor để biết dùng SQL Server hay PostgreSQL, ....
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
+    {
+    }
+
+    public DbSet<TestItem> TestItems { get; set; }
+    public DbSet<Shift> Shifts { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<InfractionTicket> InfractionTickets { get; set; }
+    public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<ProductSupplier> ProductSuppliers { get; set; }
+    public DbSet<Note> Notes { get; set; }
+    public DbSet<GoodsReceipt> GoodsReceipts { get; set; }
+    public DbSet<DeliveryNote> deliveryNotes { get; set; }
+    public DbSet<DamageNote> damageNotes { get; set; }
+    public DbSet<InventoryCheckNote> InventoryCheckNotes { get; set; }
+    public DbSet<DamageItem> damageItems { get; set; }
+    public DbSet<ReceiptItem> receiptItems { get; set; }
+    public DbSet<DeliveryItem> deliveryItems { get; set; }
+    public DbSet<InventoryCheckItem> inventoryCheckItems { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<OTP> OTPs { get; set; }
+    public DbSet<VerifyEmailToken> VerifyEmailTokens { get; set; }
+
+    public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+    public DbSet<Warehouse> Warehouses { get; set; }
+    public DbSet<WarehouseStaff> WarehouseStaffs { get; set; }
+    public DbSet<Invitation> Invitations { get; set; }
+
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<RolePermission> RolePermissions { get; set; }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder); //gọi cấu hình mặc định của EF trước.
+
+        
+
+        
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly); // Tự động tìm all những file Configure trên apply hết
+
+        var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
+            v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
+            v => v
+        ); 
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                {
+                    property.SetValueConverter(dateTimeConverter);
+                }
+            }
+        }
+    }
+
+    
+}
+
+//AppDbContext là trung tâm của Entity Framework Core.
+
+//DbSet : Entity User sẽ map tới table Users
+
+// DateTimeKind thuong co 2 khung gio: Local and UTC
+// code sau modelBuilder ==> Toàn bộ DateTime trong project theo gio UTC
+
+
+//
