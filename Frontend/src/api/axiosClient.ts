@@ -39,13 +39,15 @@ axiosClient.interceptors.response.use(  //Nó chặn response sau khi API trả 
           refreshToken: localStorage.getItem('refresh_token') || '' //Gọi refresh token
         } as refreshFormData;
         const response = await authApi.refresh(form);
-        localStorage.setItem('access_token', response.data.accessToken); //Lưu access token mới
-        originalRequest.headers['Authorization'] = 'Bearer ' + response.data.accessToken; //Gắn token mới vào request cũ
+        localStorage.setItem('access_token', response.data.accessToken);
+        localStorage.setItem('refresh_token', response.data.refreshToken);
+        originalRequest.headers['Authorization'] = 'Bearer ' + response.data.accessToken;
       } catch (error) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-
-          window.location.href = '/signin';
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('warehouse');
+        // window.location.href = '/signin';
 
         // Trả về lỗi để chặn các logic xử lý phía sau
         return Promise.reject(error);

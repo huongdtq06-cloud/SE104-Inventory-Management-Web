@@ -9,7 +9,7 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) 
     {
     }
-
+    // < > là nhưng Class trong Entities
     public DbSet<TestItem> TestItems { get; set; }
     public DbSet<Shift> Shifts { get; set; }
     public DbSet<User> Users { get; set; }
@@ -45,7 +45,8 @@ public class AppDbContext : DbContext
         
 
         
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly); // Tự động tìm all những file Configure trên apply hết
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly); 
+        //Dòng này tự động load toàn bộ file cấu hình trong folder Configurations.
 
         var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
             v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),

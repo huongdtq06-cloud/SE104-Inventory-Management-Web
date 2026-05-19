@@ -1,48 +1,79 @@
-// gọi DashboardService để tính dữ liệu cho Dashboard Screen
-import { useMemo } from 'react';
-import { useNotes } from '../context/NoteContext';
-import { MOCK_PRODUCTS } from '../data/MOCK_PRODUCTS';
-import { MOCK_STAFF } from '../data/MOCK_STAFF';
-import { DashboardService } from '../services/DashboardService';
-import { useProducts } from './useProducts';
-import { useShifts } from './useShifts';
-import { useStaff } from './useStaffs';
-import { useAuth } from '../context/AuthContext';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { isAxiosError } from 'axios';
+import { toast } from 'sonner';
+import dashboardApi from '../api/DashboardAPI';
+import { useWarehouseContext } from '../context/WarehouseContext';
+import { type ManagerDashboardData } from '../types/dashboard/manager';
+import { type StaffDashboardData } from '../types/dashboard/staff';
+
+const emptyManager: ManagerDashboardData = {
+  stats: [],
+  lowStockItems: [],
+  recentActivities: [],
+  productCategories: [],
+  revenueByYear: [],
+  topProductsByYear: [],
+};
+
+const emptyStaff: StaffDashboardData = {
+  stats: [],
+  lowStockItems: [],
+  inventoryTrend: [],
+  weeklySchedule: [],
+  infractions: [],
+  recentActivities: [],
+  noteEntries: [],
+};
 
 export const useDashboard = () => {
-  const { products } = useProducts(MOCK_PRODUCTS);
-  const { staffs } = useStaff(MOCK_STAFF);
-  const { shifts } = useShifts(); 
-  const { allNotes, getDeliveries } = useNotes();
-  const { user } = useAuth();
+  const { warehouseId, role } = useWarehouseContext();
+  const [manager, setManager] = useState<ManagerDashboardData>(emptyManager);
+  const [staff, setStaff] = useState<StaffDashboardData>(emptyStaff);
+  const [loading, setLoading] = useState(false);
 
-  const deliveries = getDeliveries();
+  const fetchDashboard = useCallback(async () => {
+    if (!warehouseId || !role) {
+      setManager(emptyManager);
+      setStaff(emptyStaff);
+      return;
+    }
 
-  return useMemo(() => {
-    const lowStockItems = DashboardService.getLowStockAlerts(products);
-    const recentActivities = DashboardService.getRecentActivities(allNotes, shifts, user?.userName);
-    const productCategories = DashboardService.getCategoryDistribution(products);
-    const revenueByYear = DashboardService.getYearlyFinancialStatsList(deliveries, products);
-    const topProductsByYear = DashboardService.getTopProducts(deliveries, products);
+    setLoading(true);
+    try {
+      if (role === 'manager') {
+        const res = await dashboardApi.getManager(warehouseId);
+        setManager(res.data);
+        setStaff(emptyStaff);
+      } else if (role === 'staff') {
+        const res = await dashboardApi.getStaff(warehouseId);
+        setStaff(res.data);
+        setManager(emptyManager);
+      }
+    } catch (err: unknown) { //unknown có thể là bất cứ gì, nhưng vẫn phải chạy đc đoạn code dưới vd err: number thì err.response --> lỗi
+      if (!isAxiosError(err)) {
+        toast.error('Failed to load dashboard data');
+      } else {
+        toast.error(err.response?.data?.message || 'Failed to load dashboard data');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [warehouseId, role]);
 
-    return {
-      manager: {
-        stats: DashboardService.getManagerStats(products, allNotes, deliveries),
-        lowStockItems,
-        recentActivities,
-        productCategories,
-        revenueByYear,
-        topProductsByYear,
-      },
-      staff: {
-        stats: DashboardService.getStaffStats(products, allNotes, staffs),
-        lowStockItems,
-        inventoryTrend: DashboardService.getInventoryTrend(allNotes, products),
-        weeklySchedule: DashboardService.getWeeklySchedule(shifts, user?.userName),
-        infractions: DashboardService.getInfractions(staffs, user?.userName),
-        recentActivities: DashboardService.getStaffRecentActivities(allNotes, user?.userName),
-        noteEntries: DashboardService.getNoteEntries(allNotes, user?.userName),
-      },
-    };
-  }, [allNotes, deliveries, products, shifts, staffs]);
+  useEffect(() => {
+    void fetchDashboard();
+  }, [fetchDashboard]); 
+  // khi warehouseId, role thay đổi thì fetchDashboard cũng thay đổi theo
+  // useCallback để Giữ nguyên function này, đừng tạo mới lung tung (chỉ thay đổi khi thay đổi warehouseId, role) 
+  // => để khi render lại useEffect không bị loop vì function mới -> effect chạy lại -> setState -> render -> function mới
+
+  return useMemo( //useMemo: “Giữ nguyên object cũ nếu data chưa đổi”
+    () => ({
+      manager,
+      staff,
+      loading,
+      refetch: fetchDashboard,
+    }),
+    [manager, staff, loading, fetchDashboard],
+  );
 };

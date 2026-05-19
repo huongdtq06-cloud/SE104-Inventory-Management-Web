@@ -60,3 +60,12 @@ export type DashboardStat = {
   tone: 'blue' | 'green' | 'red' | 'purple';
   icon: 'package' | 'dollar' | 'alert' | 'note' | 'store' | 'activity' | 'users';
 };
+
+export type ManagerDashboardData = {
+  stats: DashboardStat[];
+  lowStockItems: LowStockItem[];
+  recentActivities: RecentActivity[];
+  productCategories: ProductCategory[];
+  revenueByYear: YearlyRevenueData[];
+  topProductsByYear: YearlyTopProducts[];
+};

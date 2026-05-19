@@ -118,6 +118,7 @@ builder.Services.AddScoped<IWarehouseReadService, WarehouseReadService>();
 builder.Services.AddScoped<IWarehouseStaffService, WarehouseStaffService>();
 builder.Services.AddScoped<IInvitationReadService, InvitationReadService>();
 builder.Services.AddScoped<IInvitationInboxService, InvitationInboxService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped(typeof(ICacheService<>), typeof(CacheService<>));
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddHttpContextAccessor();
@@ -151,7 +152,7 @@ using (var scope = app.Services.CreateScope()) // Tự động chạy migration 
     {
         var context = services.GetRequiredService<AppDbContext>();
         logger.LogInformation("Applying EF Core migrations...");
-        context.Database.Migrate(); 
+        context.Database.Migrate();  //app gọi: thì dữ liệu seed mới được apply vào DB.
         logger.LogInformation("EF Core migrations applied successfully.");
     }
     catch (Exception ex)

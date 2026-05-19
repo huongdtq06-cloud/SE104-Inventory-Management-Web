@@ -40,3 +40,13 @@ export interface NoteEntry {
   status: NoteStatus;
   reason?: string;
 }
+
+export interface StaffDashboardData {
+  stats: import('./manager').DashboardStat[];
+  lowStockItems: import('./manager').LowStockItem[];
+  inventoryTrend: InventoryTrend[];
+  weeklySchedule: WorkSchedule[];
+  infractions: Infraction[];
+  recentActivities: RecentActivity[];
+  noteEntries: NoteEntry[];
+}

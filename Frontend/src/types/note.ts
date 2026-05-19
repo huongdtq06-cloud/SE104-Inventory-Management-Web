@@ -5,10 +5,7 @@ export type statusNote = 'new' | 'in process' | 'pending' | 'approved' | 'reject
 
 interface BaseNote {
   id: string;
-<<<<<<< HEAD:src/types/note.ts
-=======
   warehouseId: string; // thêm warehouseId
->>>>>>> origin/main:Frontend/src/types/note.ts
   noteNumber: string;
   dateCreated: string;
   status: statusNote;

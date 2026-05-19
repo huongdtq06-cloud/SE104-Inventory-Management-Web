@@ -54,11 +54,7 @@ const ShiftScreen = () => {
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center">
                 <div>
                     <p className="text-slate-500 text-md mb-1">Total Shifts</p>
-<<<<<<<< HEAD:src/screens/manager/ShiftScreen.tsx
                     <span className="text-4xl font-bold text-slate-900"> {getTotalShifts()} </span>
-========
-                    <span className="text-4xl font-bold text-slate-900">9</span>
->>>>>>>> origin/main:Frontend/src/screens/manager/ShiftScreen.tsx
                 </div>
                 <div className="bg-blue-100 p-3 rounded-xl text-blue-600">
                     <Calendar size={28} />
@@ -69,11 +65,8 @@ const ShiftScreen = () => {
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center">
                 <div>
                     <p className="text-slate-500 text-md mb-1">Empty Shifts</p>
-<<<<<<<< HEAD:src/screens/manager/ShiftScreen.tsx
                     <span className="text-4xl font-bold text-slate-900">{getEmptyShiftsCount()}</span>
-========
-                    <span className="text-4xl font-bold text-slate-900">4</span>
->>>>>>>> origin/main:Frontend/src/screens/manager/ShiftScreen.tsx
+
                 </div>
                 <div className="bg-yellow-100 p-3 rounded-xl text-yellow-600">
                     <User size={28} />
@@ -84,11 +77,7 @@ const ShiftScreen = () => {
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center">
                 <div>
                     <p className="text-slate-500 text-md mb-1">Urgent Coverage</p>
-<<<<<<<< HEAD:src/screens/manager/ShiftScreen.tsx
                     <span className="text-4xl font-bold text-slate-900">{getUrgentCoverageCount()}</span>
-========
-                    <span className="text-4xl font-bold text-slate-900">4</span>
->>>>>>>> origin/main:Frontend/src/screens/manager/ShiftScreen.tsx
                 </div>
                 <div className="bg-red-100 p-3 rounded-xl text-red-500">
                     <AlertTriangle size={28} />

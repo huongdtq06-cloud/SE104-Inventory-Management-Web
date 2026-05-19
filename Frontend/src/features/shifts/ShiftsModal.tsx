@@ -45,15 +45,11 @@ export const ShiftsModal = ({isOpen, onClose, onSubmit, initialData}: Props) => 
       }
     }, [initialData, isOpen]);
 
-<<<<<<< HEAD:src/features/shifts/ShiftsModal.tsx
-    const handleSubmit = (e: React.FormEvent) => {
-=======
     const handleCloseAddModal = () => {
       //resetForm();
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
->>>>>>> origin/main:Frontend/src/features/shifts/ShiftsModal.tsx
       e.preventDefault();
       await onSubmit(formData);
     }

@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:src/hooks/useProducts.ts
-import { useState } from 'react';
-========
 import { useCallback, useState } from 'react';
->>>>>>>> origin/main:Frontend/src/hooks/useProducts.ts
 import { type Product, type ProductFormData } from '../types/product';
 import { toast } from 'sonner';
 import { MOCK_PRODUCTS } from '../data/MOCK_PRODUCTS';

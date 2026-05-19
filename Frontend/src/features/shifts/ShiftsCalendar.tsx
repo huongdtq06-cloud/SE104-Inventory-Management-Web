@@ -1,11 +1,6 @@
 import { ShiftCalendarItem } from './ShiftCalendarItem';
-<<<<<<< HEAD:src/features/shifts/ShiftsCalendar.tsx
-import { type Shift } from '../../types/shift';
-import { useShiftCalendar } from '../../hooks/useShifts';
-=======
 import { type Shift, type ShiftFormData } from '../../types/shift';
 import { useShifts } from '../../hooks/useShifts';
->>>>>>> origin/main:Frontend/src/features/shifts/ShiftsCalendar.tsx
 
 interface Props {
   shifts: Shift[];
@@ -16,7 +11,7 @@ interface Props {
 const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const ShiftsCalendar = ({shifts, onOpenEditModal, onDelete,}: Props) => {
-    const {weekDates, goToToday, goToNextWeek, goToPreviousWeek} = useShiftCalendar();
+    const {weekDates, goToToday, goToNextWeek, goToPreviousWeek} = useShifts();
 
     return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
