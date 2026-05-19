@@ -20,10 +20,21 @@ public class WarehouseDashboardController : ControllerBase
 
     [HttpGet("manager")]
     [Authorize(Policy = PermissionCode.NOTE_VIEW_ALL)]
-    public async Task<IActionResult> GetManagerDashboard(int warehouseId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetManagerDashboard(
+        int warehouseId,
+        [FromQuery] int? revenueYear,
+        [FromQuery] int? topProductsYear,
+        [FromQuery] int? topProductsMonth,
+        CancellationToken cancellationToken)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var data = await _dashboard.GetManagerDashboardAsync(warehouseId, userId, cancellationToken);
+        var data = await _dashboard.GetManagerDashboardAsync(
+            warehouseId,
+            userId,
+            revenueYear,
+            topProductsYear,
+            topProductsMonth,
+            cancellationToken);
         return Ok(data);
     }
 

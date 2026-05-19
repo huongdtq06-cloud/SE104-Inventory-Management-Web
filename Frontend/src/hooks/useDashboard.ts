@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isAxiosError } from 'axios';
 import { toast } from 'sonner';
-import dashboardApi from '../api/DashboardAPI';
+import dashboardApi, { type ManagerDashboardParams } from '../api/DashboardAPI';
 import { useWarehouseContext } from '../context/WarehouseContext';
 import { type ManagerDashboardData } from '../types/dashboard/manager';
 import { type StaffDashboardData } from '../types/dashboard/staff';
@@ -25,7 +25,7 @@ const emptyStaff: StaffDashboardData = {
   noteEntries: [],
 };
 
-export const useDashboard = () => {
+export const useDashboard = (managerParams?: ManagerDashboardParams) => {
   const { warehouseId, role } = useWarehouseContext();
   const [manager, setManager] = useState<ManagerDashboardData>(emptyManager);
   const [staff, setStaff] = useState<StaffDashboardData>(emptyStaff);
@@ -41,7 +41,7 @@ export const useDashboard = () => {
     setLoading(true);
     try {
       if (role === 'manager') {
-        const res = await dashboardApi.getManager(warehouseId);
+        const res = await dashboardApi.getManager(warehouseId, managerParams);
         setManager(res.data);
         setStaff(emptyStaff);
       } else if (role === 'staff') {
@@ -58,7 +58,7 @@ export const useDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [warehouseId, role]);
+  }, [warehouseId, role, managerParams?.revenueYear, managerParams?.topProductsYear, managerParams?.topProductsMonth]);
 
   useEffect(() => {
     void fetchDashboard();

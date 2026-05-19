@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import StatsCards from '../../features/dashboard/StatsCards';
 import LowStockAlert from '../../features/dashboard/LowStockAlert';
 import ProductCategoryChart from '../../features/dashboard/manager/ProductCategoryChart';
@@ -7,7 +8,15 @@ import TopProducts from '../../features/dashboard/manager/TopProducts';
 import { useDashboard } from '../../hooks/useDashboard';
 
 const DashboardManagerScreen = () => {
-  const { manager } = useDashboard();
+  const now = new Date();
+  const [revenueYear, setRevenueYear] = useState(now.getFullYear());
+  const [topProductsYear, setTopProductsYear] = useState(now.getFullYear());
+  const [topProductsMonth, setTopProductsMonth] = useState(now.getMonth() + 1);
+  const managerParams = useMemo(
+    () => ({ revenueYear, topProductsYear, topProductsMonth }),
+    [revenueYear, topProductsYear, topProductsMonth],
+  );
+  const { manager } = useDashboard(managerParams);
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
@@ -20,7 +29,11 @@ const DashboardManagerScreen = () => {
 
       <div className="grid grid-cols-5 gap-6 mb-8">
         <div className="col-span-3">
-          <RevenueChart revenueByYear={manager.revenueByYear} />
+          <RevenueChart
+            revenueByYear={manager.revenueByYear}
+            selectedYear={revenueYear}
+            onYearChange={setRevenueYear}
+          />
         </div>
         <div className="col-span-2">
           <ProductCategoryChart categories={manager.productCategories} />
@@ -28,7 +41,13 @@ const DashboardManagerScreen = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-6 mb-8">
-        <TopProducts topProductsByYear={manager.topProductsByYear} />
+        <TopProducts
+          topProductsByYear={manager.topProductsByYear}
+          selectedYear={topProductsYear}
+          selectedMonth={topProductsMonth}
+          onYearChange={setTopProductsYear}
+          onMonthChange={setTopProductsMonth}
+        />
         <LowStockAlert items={manager.lowStockItems} />
       </div>
       <RecentActivities activities={manager.recentActivities} />

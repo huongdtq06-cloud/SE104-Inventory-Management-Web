@@ -20,7 +20,13 @@ public class DashboardService : IDashboardService
         _db = db;
     }
 
-    public async Task<ManagerDashboardDTO> GetManagerDashboardAsync(int warehouseId, int userId, CancellationToken cancellationToken = default)
+    public async Task<ManagerDashboardDTO> GetManagerDashboardAsync(
+        int warehouseId,
+        int userId,
+        int? revenueYear = null,
+        int? topProductsYear = null,
+        int? topProductsMonth = null,
+        CancellationToken cancellationToken = default)
     {
         var products = await GetProductsAsync(warehouseId, cancellationToken);
         var deliveries = await GetDeliveriesAsync(warehouseId, null, cancellationToken);
@@ -30,8 +36,11 @@ public class DashboardService : IDashboardService
         var notes = BuildNotes(deliveries, receipts, inventoryChecks);
         var lowStockItems = GetLowStockAlerts(products);
         var currentYear = DateTime.UtcNow.Year;
-        var revenueByYear = GetYearlyFinancialStatsList(deliveries, products);
-        var yearRevenue = revenueByYear.FirstOrDefault(r => r.Year == currentYear)?.Data.Sum(m => m.Revenue) ?? 0;
+        var selectedRevenueYear = revenueYear ?? currentYear;
+        var selectedTopProductsYear = topProductsYear ?? selectedRevenueYear;
+        var selectedTopProductsMonth = NormalizeMonth(topProductsMonth);
+        var revenueByYear = GetYearlyFinancialStatsList(deliveries, products, selectedRevenueYear);
+        var yearRevenue = revenueByYear.FirstOrDefault(r => r.Year == selectedRevenueYear)?.Data.Sum(m => m.Revenue) ?? 0;
 
         return new ManagerDashboardDTO
         {
@@ -49,7 +58,7 @@ public class DashboardService : IDashboardService
                 {
                     Title = "Year Revenue",
                     Value = FormatCurrencyShort(yearRevenue),
-                    Change = $"From approved deliveries in {currentYear}",
+                    Change = $"From approved deliveries in {selectedRevenueYear}",
                     Icon = "dollar",
                     Tone = "green",
                 },
@@ -74,7 +83,7 @@ public class DashboardService : IDashboardService
             RecentActivities = GetManagerRecentActivities(notes, shifts, userId),
             ProductCategories = GetCategoryDistribution(products),
             RevenueByYear = revenueByYear,
-            TopProductsByYear = GetTopProducts(deliveries, products),
+            TopProductsByYear = GetTopProducts(deliveries, products, selectedTopProductsYear, selectedTopProductsMonth),
         };
     }
 
@@ -349,20 +358,23 @@ public class DashboardService : IDashboardService
         return new YearlyRevenueDTO { Year = year, Data = data };
     }
 
-    private static List<YearlyRevenueDTO> GetYearlyFinancialStatsList(List<DeliveryNote> deliveries, List<Product> products)
+    private static List<YearlyRevenueDTO> GetYearlyFinancialStatsList(List<DeliveryNote> deliveries, List<Product> products, int? selectedYear = null)
     {
         var years = deliveries.Where(IsApproved).Select(delivery => delivery.Date.Year).ToHashSet();
-        years.Add(DateTime.UtcNow.Year);
+        years.Add(selectedYear ?? DateTime.UtcNow.Year);
         return years.Order().Select(year => GetYearlyFinancialStats(year, deliveries, products)).ToList();
     }
 
-    private static List<YearlyTopProductsDTO> GetTopProducts(List<DeliveryNote> deliveries, List<Product> products)
+    private static List<YearlyTopProductsDTO> GetTopProducts(List<DeliveryNote> deliveries, List<Product> products, int? selectedYear = null, int? selectedMonth = null)
     {
         var productByName = products.ToDictionary(p => p.Name, p => p);
         var salesByMonth = new Dictionary<string, Dictionary<string, TopProductItemDTO>>();
 
         foreach (var delivery in deliveries.Where(IsApproved))
         {
+            if (selectedYear.HasValue && delivery.Date.Year != selectedYear.Value) continue;
+            if (selectedMonth.HasValue && delivery.Date.Month != selectedMonth.Value && delivery.Date.Month != selectedMonth.Value - 1) continue;
+
             var key = $"{delivery.Date.Year}-{delivery.Date.Month}";
             if (!salesByMonth.TryGetValue(key, out var productSales))
             {
@@ -390,6 +402,7 @@ public class DashboardService : IDashboardService
             var parts = key.Split('-').Select(int.Parse).ToArray();
             var year = parts[0];
             var month = parts[1];
+            if (selectedMonth.HasValue && month != selectedMonth.Value) continue;
             salesByMonth.TryGetValue($"{year}-{month - 1}", out var previousSales);
 
             var topProducts = productSales.Values
@@ -410,6 +423,21 @@ public class DashboardService : IDashboardService
             }
 
             yearData.Months.Add(new MonthlyTopProductsDTO { Month = month, TopProducts = topProducts });
+        }
+
+        if (selectedYear.HasValue && !years.ContainsKey(selectedYear.Value))
+        {
+            var yearData = new YearlyTopProductsDTO { Year = selectedYear.Value };
+            if (selectedMonth.HasValue)
+            {
+                yearData.Months.Add(new MonthlyTopProductsDTO { Month = selectedMonth.Value });
+            }
+
+            years[selectedYear.Value] = yearData;
+        }
+        else if (selectedYear.HasValue && selectedMonth.HasValue && !years[selectedYear.Value].Months.Any(m => m.Month == selectedMonth.Value))
+        {
+            years[selectedYear.Value].Months.Add(new MonthlyTopProductsDTO { Month = selectedMonth.Value });
         }
 
         return years.Values
@@ -474,6 +502,9 @@ public class DashboardService : IDashboardService
         if (product.StockQuantity <= 20) return "low stock";
         return "in stock";
     }
+
+    private static int? NormalizeMonth(int? month)
+        => month is >= 1 and <= 12 ? month : null;
 
     private static string FormatCurrencyShort(decimal value)
     {
