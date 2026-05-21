@@ -26,7 +26,7 @@ const ProductViewRow: React.FC<Props> = ({ product }) => {
         <div className="flex items-center gap-3">
           <div className="w-20 h-20 rounded-lg flex overflow-hidden items-center justify-center">
             {product.image ? (
-              <img src={product.image} alt={product.name} className="w-full h-full" />
+              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
             ) : (
               <Package className="w-20 h-20 text-gray-400" />
             )}

@@ -13,7 +13,7 @@ public class OTPConfiguration : IEntityTypeConfiguration<OTP>
         builder.HasIndex(o => new { o.Email, o.Code });
         builder.HasIndex(o => o.Email)
             .IsUnique()
-            .HasFilter("[IsUsed] = 0");
+            .HasFilter("\"IsUsed\" = FALSE");
 
         builder.HasData(
             new OTP

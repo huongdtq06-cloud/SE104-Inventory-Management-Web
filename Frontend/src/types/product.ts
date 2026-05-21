@@ -1,6 +1,7 @@
 export interface Product {
   id: string;
   image?: string;
+  imageFile?: File | null;
   name: string;
   sku: string;
   category: string;

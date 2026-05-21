@@ -11,16 +11,13 @@ public class DamageItemConfiguration : IEntityTypeConfiguration<DamageItem>
         builder.HasOne(di => di.DamageNote)
             .WithMany(dn => dn.DamageItems)
             .HasForeignKey(di => di.NoteId)
-            .OnDelete(DeleteBehavior.Cascade); // tự động xoá toàn bộ DamageItems liên quan
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(di => di.Product)
             .WithMany(p => p.DamageItems)
             .HasForeignKey(di => di.ProductId)
-            .OnDelete(DeleteBehavior.Restrict); //KHÔNG cho xoá Product nếu còn DamageItem tham chiếu tới nó
+            .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasData(
-            new DamageItem { DamageItemId = 1, NoteId = 3, ProductId = 2, Quantity = 1, Reason = "Broken" } 
-            //EF Core sẽ tự insert dữ liệu mẫu khi migration/update database.
-        );
+        builder.HasData(SeedData.DamageItems);
     }
 }

@@ -165,6 +165,7 @@ using (var scope = app.Services.CreateScope()) // Tự động chạy migration 
 app.UseRouting();
 
 app.UseCors("DevCors");
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 

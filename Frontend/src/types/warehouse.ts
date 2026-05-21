@@ -9,12 +9,15 @@ export type WarehouseStatusType = typeof WarehouseStatus[keyof typeof WarehouseS
 
 export interface Warehouse {
   warehouseId: string;
+  role?: "manager" | "staff";
   name: string;
-  address: string;
+  address?: string;
+  location?: string;
   lastUpdate: string;
   status: WarehouseStatusType;
-  productCount: number;
+  productCount: number | string;
   imageUrl?: string;
+  urlimage?: string;
 }
 
 export interface Invitation {
@@ -27,4 +30,11 @@ export interface Invitation {
   address: string;
   requestedRole: "manager" | "staff";
   imageUrl?: string;
+}
+
+export interface FormCreateWarehouse {
+  name: string;
+  location: string;
+  urlimage?: string;
+  imageFile?: File | null;
 }

@@ -10,12 +10,18 @@ import ProductRow from '../../features/products/ProductRowStyle';
 import { useProducts } from '../../hooks/useProducts';
 import { type Product, type ProductFormData } from '../../types/product';
 
+const resolveImageUrl = (url: string) => {
+  if (!url) return '';
+  if (/^(https?:|blob:|data:)/i.test(url)) return url;
+  return `http://localhost:5074${url}`;
+};
+
 const mapApiProductToProduct = (data: any): Product => {
   const status = (data?.status ?? 'undefined') as Product['status'];
 
   return {
     id: String(data?.productId ?? data?.id ?? ''),
-    image: data?.imageUrl ?? data?.image ?? '',
+    image: resolveImageUrl(data?.imageUrl ?? data?.image ?? ''),
     name: data?.name ?? '',
     sku: data?.sku ?? '',
     category: data?.category ?? '',
@@ -67,6 +73,7 @@ const ProductScreen = () => {
       const payload: Product = {
         id: editingItem?.id ?? '0',
         image: formData.image,
+        imageFile: formData.imageFile ?? null,
         name: formData.name,
         sku: formData.sku,
         category: formData.category,

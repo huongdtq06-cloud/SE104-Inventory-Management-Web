@@ -13,6 +13,7 @@ interface Props {
 
 const DEFAULT_FORM: ProductFormData = {
   image: '',
+  imageFile: null,
   name: '',
   sku: '',
   sellPrice: '',
@@ -23,17 +24,29 @@ const DEFAULT_FORM: ProductFormData = {
 const ProductModal = ({ isOpen, onClose, onSubmit, initialData }: Props) => {
   const [formData, setFormData] = useState<ProductFormData>(DEFAULT_FORM);
   const [submitting, setSubmitting] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
 
   useEffect(() => {
     if (initialData) {
       setFormData({
         ...initialData,
+        imageFile: null,
         sellPrice: initialData.sellPrice.toString(),
       });
     } else {
       setFormData(DEFAULT_FORM);
     }
   }, [initialData, isOpen]);
+
+  useEffect(() => {
+    if (formData.imageFile) {
+      const url = URL.createObjectURL(formData.imageFile);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+
+    setPreviewUrl(formData.image ?? '');
+  }, [formData.image, formData.imageFile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,12 +71,19 @@ const ProductModal = ({ isOpen, onClose, onSubmit, initialData }: Props) => {
       <form onSubmit={handleSubmit}>
         <div className="">
           <div className="">
-            <button
-              type="button"
-              className="bg-gray-200 rounded-lg w-30 h-30 flex items-center justify-center hover:bg-gray-300 transition-colors"
-            >
-              <Plus className="w-10 h-10 text-gray-500" />
-            </button>
+            <label className="bg-gray-200 rounded-lg w-30 h-30 flex overflow-hidden items-center justify-center hover:bg-gray-300 transition-colors cursor-pointer">
+              {previewUrl ? (
+                <img src={previewUrl} alt="Product preview" className="w-full h-full object-cover" />
+              ) : (
+                <Plus className="w-10 h-10 text-gray-500" />
+              )}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                className="hidden"
+                onChange={(e) => setFormData({ ...formData, imageFile: e.target.files?.[0] ?? null })}
+              />
+            </label>
           </div>
         </div>
 
