@@ -45,6 +45,10 @@ export const useProducts = (initialData: Product[] = MOCK_PRODUCTS) => {
     setProducts(next);
   }, []);
 
+  const replaceProduct = useCallback((product: Product) => {
+    setProducts((prev) => prev.map((p) => (p.id === product.id ? product : p)));
+  }, []);
+
   const updateProduct = (id: string, data: ProductFormData) => {
     //const stock = parseInt(data.stock);
     setProducts((prev) =>
@@ -63,5 +67,5 @@ export const useProducts = (initialData: Product[] = MOCK_PRODUCTS) => {
   };
 
 
-  return { products, addProduct, appendProduct, replaceProducts, updateProduct, deleteProduct, filteredProducts };
+  return { products, addProduct, appendProduct, replaceProducts, replaceProduct, updateProduct, deleteProduct, filteredProducts };
 };

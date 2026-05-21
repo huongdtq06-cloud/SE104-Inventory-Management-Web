@@ -10,7 +10,10 @@ public class OTPConfiguration : IEntityTypeConfiguration<OTP>
     {
         builder.Property(o => o.Code).IsRequired(); // not null
         builder.Property(o => o.Email).IsRequired();
-        builder.HasIndex(o => new { o.Email, o.Code }); // Vì cần tìm irstOrDefaultAsync của cặp Email , Code nên có index tìm sẽ nhanh hơn
+        builder.HasIndex(o => new { o.Email, o.Code });
+        builder.HasIndex(o => o.Email)
+            .IsUnique()
+            .HasFilter("[IsUsed] = 0");
 
         builder.HasData(
             new OTP
