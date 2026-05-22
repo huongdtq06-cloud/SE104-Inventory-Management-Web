@@ -12,9 +12,15 @@ import warehouseNotesApi from '../../api/WarehouseNotesAPI';
 import { useWarehouseContext } from '../../context/WarehouseContext';
 import { useProducts } from '../../hooks/useProducts';
 
+const resolveImageUrl = (url: string) => {
+  if (!url) return '';
+  if (/^(https?:|blob:|data:)/i.test(url)) return url;
+  return `http://localhost:5074${url}`;
+};
+
 const mapApiProductToProduct = (data: any): Product => ({
   id: String(data?.productId ?? data?.id ?? ''),
-  image: data?.imageUrl ?? data?.image ?? '',
+  image: resolveImageUrl(data?.imageUrl ?? data?.image ?? ''),
   name: data?.name ?? '',
   sku: data?.sku ?? '',
   category: data?.category ?? '',

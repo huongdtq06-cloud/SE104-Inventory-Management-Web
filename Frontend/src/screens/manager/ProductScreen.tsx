@@ -10,12 +10,18 @@ import ProductRow from '../../features/products/ProductRowStyle';
 import { useProducts } from '../../hooks/useProducts';
 import { type Product, type ProductFormData } from '../../types/product';
 
+const resolveImageUrl = (url: string) => {
+  if (!url) return '';
+  if (/^(https?:|blob:|data:)/i.test(url)) return url;
+  return `http://localhost:5074${url}`;
+};
+//convert format của BE/api sang của FE
 const mapApiProductToProduct = (data: any): Product => {
-  const status = (data?.status ?? 'undefined') as Product['status'];
+  const status = (data?.status ?? 'undefined') as Product['status']; // cho phép null/defined nhưng nếu dị thì là string 'undefined'
 
   return {
     id: String(data?.productId ?? data?.id ?? ''),
-    image: data?.imageUrl ?? data?.image ?? '',
+    image: resolveImageUrl(data?.imageUrl ?? data?.image ?? ''),
     name: data?.name ?? '',
     sku: data?.sku ?? '',
     category: data?.category ?? '',
@@ -72,6 +78,7 @@ const ProductScreen = () => {
       const payload: Product = {
         id: editingItem?.id ?? '0',
         image: formData.image,
+        imageFile: formData.imageFile ?? null,
         name: formData.name,
         sku: formData.sku,
         category: formData.category,
@@ -102,6 +109,8 @@ const ProductScreen = () => {
       toast.success('Product added successfully');
       return true;
     } catch (err: unknown) {
+      console.error('PRODCUCT ERROR:', err);
+
       if (!isAxiosError(err)) {
         toast.error('Failed to create product');
         return false;
@@ -154,7 +163,7 @@ const ProductScreen = () => {
         <OpenModalButton label="Add Product" onClick={() => handleOpenAddModal()}></OpenModalButton>
       </div>
 
-      <SearchBar label="Search Product's Name ...." onChange={(e) => setSearchTerm(e.target.value)}></SearchBar>
+      <SearchBar label="Search Product's Name or SKU...." onChange={(e) => setSearchTerm(e.target.value)}></SearchBar>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
