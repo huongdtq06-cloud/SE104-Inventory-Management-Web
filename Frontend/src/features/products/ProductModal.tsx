@@ -9,6 +9,7 @@ interface Props {
   onClose: () => void;
   onSubmit: (data: ProductFormData) => boolean | void | Promise<boolean | void>;
   initialData: Product | null;
+  categoryOptions?: string[];
 }
 
 const DEFAULT_FORM: ProductFormData = {
@@ -21,7 +22,7 @@ const DEFAULT_FORM: ProductFormData = {
   category: ''
 };
 
-const ProductModal = ({ isOpen, onClose, onSubmit, initialData }: Props) => {
+const ProductModal = ({ isOpen, onClose, onSubmit, initialData, categoryOptions = [] }: Props) => {
   const [formData, setFormData] = useState<ProductFormData>(DEFAULT_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -120,21 +121,18 @@ const ProductModal = ({ isOpen, onClose, onSubmit, initialData }: Props) => {
           </div>
           <div className="">
             <label className="modal-label">Category *</label>
-            <select
-              className={`modal-input ${formData.category === '' ? 'text-gray-400' : 'text-black'}`}
+            <input
+              className="modal-input"
+              list="product-category-options"
+              placeholder="Select or enter category"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            >
-              <option value="" disabled>
-                Select a category
-              </option>
-              <option value="T-Shirt">T-Shirt</option>
-              <option value="Jeans">Jeans</option>
-              <option value="Shoes">Shoes</option>
-              <option value="Jacket">Jacket</option>
-              <option value="Hoodie">Hoodie</option>
-              <option value="Boot">Boot</option>
-            </select>
+            />
+            <datalist id="product-category-options">
+              {categoryOptions.map((category) => (
+                <option key={category} value={category} />
+              ))}
+            </datalist>
           </div>
         </div>
 
