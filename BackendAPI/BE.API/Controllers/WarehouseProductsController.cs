@@ -61,7 +61,7 @@ public class WarehouseProductsController : ControllerBase
     {
         var imageUrl = model.ImageFile != null
             ? await SaveImageAsync(model.ImageFile, "products")
-            : model.ImageUrl;
+            : model.ImageUrl ?? string.Empty;
         var entity = await _products.CreateAsync(warehouseId, model.ToProductDTO(imageUrl), cancellationToken);
         return CreatedAtAction(nameof(GetById), new { warehouseId, productId = entity.ProductId }, Map(entity));
     }
@@ -72,7 +72,7 @@ public class WarehouseProductsController : ControllerBase
     {
         var imageUrl = model.ImageFile != null
             ? await SaveImageAsync(model.ImageFile, "products")
-            : model.ImageUrl;
+            : model.ImageUrl ?? string.Empty;
         var entity = await _products.UpdateAsync(warehouseId, productId, model.ToProductDTO(imageUrl), cancellationToken);
         if (entity == null) return NotFound();
         return Ok(Map(entity));

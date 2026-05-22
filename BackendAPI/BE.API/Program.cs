@@ -17,11 +17,18 @@ using Hangfire.PostgreSql;
 using System.Data.Common;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.FileProviders;
 using Npgsql;
 
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); //giữ nguyên tên claim.
 var builder = WebApplication.CreateBuilder(args); //thêm service, đọc config, cấu hình ứng dụng
+
+var webRootPath = builder.Environment.WebRootPath
+    ?? Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+
+Directory.CreateDirectory(Path.Combine(webRootPath, "uploads", "products"));
+Directory.CreateDirectory(Path.Combine(webRootPath, "uploads", "warehouses"));
 
 
 // Cho phép frontend gọi API.
@@ -165,7 +172,10 @@ using (var scope = app.Services.CreateScope()) // Tự động chạy migration 
 app.UseRouting();
 
 app.UseCors("DevCors");
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(webRootPath)
+});
 app.UseAuthentication();
 app.UseAuthorization();
 

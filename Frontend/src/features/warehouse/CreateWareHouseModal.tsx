@@ -25,7 +25,7 @@ export const CreateWareHouseModal: React.FC<CreateWareHouseModalProps> = ({
       return;
     }
 
-    const url = URL.createObjectURL(imageFile);
+    const url = URL.createObjectURL(imageFile); //Browser tạo URL tạm cho file local.
     setPreviewUrl(url);
     return () => URL.revokeObjectURL(url);
   }, [imageFile]);

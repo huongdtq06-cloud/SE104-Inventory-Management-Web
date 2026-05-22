@@ -15,9 +15,9 @@ const resolveImageUrl = (url: string) => {
   if (/^(https?:|blob:|data:)/i.test(url)) return url;
   return `http://localhost:5074${url}`;
 };
-
+//convert format của BE/api sang của FE
 const mapApiProductToProduct = (data: any): Product => {
-  const status = (data?.status ?? 'undefined') as Product['status'];
+  const status = (data?.status ?? 'undefined') as Product['status']; // cho phép null/defined nhưng nếu dị thì là string 'undefined'
 
   return {
     id: String(data?.productId ?? data?.id ?? ''),
@@ -104,6 +104,8 @@ const ProductScreen = () => {
       toast.success('Product added successfully');
       return true;
     } catch (err: unknown) {
+      console.error('PRODCUCT ERROR:', err);
+
       if (!isAxiosError(err)) {
         toast.error('Failed to create product');
         return false;
@@ -156,7 +158,7 @@ const ProductScreen = () => {
         <OpenModalButton label="Add Product" onClick={() => handleOpenAddModal()}></OpenModalButton>
       </div>
 
-      <SearchBar label="Search Product's Name ...." onChange={(e) => setSearchTerm(e.target.value)}></SearchBar>
+      <SearchBar label="Search Product's Name or SKU...." onChange={(e) => setSearchTerm(e.target.value)}></SearchBar>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">

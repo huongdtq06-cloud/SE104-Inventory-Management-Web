@@ -1,7 +1,7 @@
 export interface Product {
   id: string;
-  image?: string;
-  imageFile?: File | null;
+  image?: string; //ảnh để HIỂN THỊ (image)
+  imageFile?: File | null; //file thật để UPLOAD (imageFile)
   name: string;
   sku: string;
   category: string;
