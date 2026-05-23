@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { isAxiosError } from 'axios';
 import { toast } from 'sonner';
 import OpenModalButton from '../../components/common/button/ModalButton';
@@ -36,11 +36,21 @@ const mapApiProductToProduct = (data: any): Product => {
 
 const ProductScreen = () => {
   const { warehouseId } = useWarehouseContext();
-  const { appendProduct, replaceProducts, replaceProduct, deleteProduct, filteredProducts } = useProducts([]);
+  const { products, appendProduct, replaceProducts, replaceProduct, deleteProduct, filteredProducts } = useProducts([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<Product | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const categoryOptions = useMemo(() => {
+    return Array.from(
+      new Set(
+        products
+          .map((product) => product.category.trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+  }, [products]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -210,6 +220,7 @@ const ProductScreen = () => {
         onClose={() => handleCloseModal()}
         initialData={editingItem}
         onSubmit={handleSubmit}
+        categoryOptions={categoryOptions}
       />
     </div>
   );

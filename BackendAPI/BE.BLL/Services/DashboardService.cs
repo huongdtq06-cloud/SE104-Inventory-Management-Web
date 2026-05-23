@@ -145,7 +145,7 @@ public class DashboardService : IDashboardService
             WeeklySchedule = GetWeeklySchedule(shifts, userName),
             Infractions = infractions.Select((infraction, index) => new StaffInfractionDashboardDTO
             {
-                Id = int.Parse($"{infraction.InfractionTicketId}{index}"),
+                Id = infraction.InfractionTicketId,
                 Reason = infraction.Description,
                 Date = infraction.Date.ToString("yyyy-MM-dd"),
                 MoneyPenalty = $"${infraction.Penalty}",
@@ -339,7 +339,7 @@ public class DashboardService : IDashboardService
 
     private static YearlyRevenueDTO GetYearlyFinancialStats(int year, List<DeliveryNote> deliveries, List<Product> products)
     {
-        var productByName = products.ToDictionary(p => p.Name, p => p);
+        var productById = products.ToDictionary(p => p.ProductId, p => p);
         var data = MonthNames.Select(month => new MonthlyRevenueDTO { Month = month }).ToList();
 
         foreach (var delivery in deliveries.Where(IsApproved))
@@ -348,7 +348,7 @@ public class DashboardService : IDashboardService
 
             foreach (var item in delivery.DeliveryItems)
             {
-                if (!productByName.TryGetValue(item.Product.Name, out var product)) continue;
+                if (!productById.TryGetValue(item.ProductId, out var product)) continue;
                 var revenue = product.SellPrice * item.Quantity;
                 data[delivery.Date.Month - 1].Revenue += revenue;
                 data[delivery.Date.Month - 1].Profit += revenue * 0.25m;
@@ -367,28 +367,27 @@ public class DashboardService : IDashboardService
 
     private static List<YearlyTopProductsDTO> GetTopProducts(List<DeliveryNote> deliveries, List<Product> products, int? selectedYear = null, int? selectedMonth = null)
     {
-        var productByName = products.ToDictionary(p => p.Name, p => p);
-        var salesByMonth = new Dictionary<string, Dictionary<string, TopProductItemDTO>>();
+        var productById = products.ToDictionary(p => p.ProductId, p => p);
+        var salesByMonth = new Dictionary<string, Dictionary<int, TopProductItemDTO>>();
 
         foreach (var delivery in deliveries.Where(IsApproved))
         {
-            if (selectedYear.HasValue && delivery.Date.Year != selectedYear.Value) continue;
-            if (selectedMonth.HasValue && delivery.Date.Month != selectedMonth.Value && delivery.Date.Month != selectedMonth.Value - 1) continue;
+            if (selectedYear.HasValue && !IsTopProductMonthInScope(delivery.Date, selectedYear.Value, selectedMonth)) continue;
 
             var key = $"{delivery.Date.Year}-{delivery.Date.Month}";
             if (!salesByMonth.TryGetValue(key, out var productSales))
             {
-                productSales = new Dictionary<string, TopProductItemDTO>();
+                productSales = new Dictionary<int, TopProductItemDTO>();
                 salesByMonth[key] = productSales;
             }
 
             foreach (var item in delivery.DeliveryItems)
             {
-                if (!productByName.TryGetValue(item.Product.Name, out var product)) continue;
-                if (!productSales.TryGetValue(item.Product.Name, out var current))
+                if (!productById.TryGetValue(item.ProductId, out var product)) continue;
+                if (!productSales.TryGetValue(item.ProductId, out var current))
                 {
-                    current = new TopProductItemDTO { Product = item.Product.Name };
-                    productSales[item.Product.Name] = current;
+                    current = new TopProductItemDTO { Product = product.Name };
+                    productSales[item.ProductId] = current;
                 }
 
                 current.Sales += item.Quantity;
@@ -403,15 +402,17 @@ public class DashboardService : IDashboardService
             var year = parts[0];
             var month = parts[1];
             if (selectedMonth.HasValue && month != selectedMonth.Value) continue;
-            salesByMonth.TryGetValue($"{year}-{month - 1}", out var previousSales);
+            var previousMonth = month == 1 ? 12 : month - 1;
+            var previousYear = month == 1 ? year - 1 : year;
+            salesByMonth.TryGetValue($"{previousYear}-{previousMonth}", out var previousSales);
 
-            var topProducts = productSales.Values
+            var topProducts = productSales
                 .Select(item => new TopProductItemDTO
                 {
-                    Product = item.Product,
-                    Sales = item.Sales,
-                    Revenue = item.Revenue,
-                    Trend = item.Sales >= (previousSales?.GetValueOrDefault(item.Product)?.Sales ?? 0) ? "up" : "down",
+                    Product = item.Value.Product,
+                    Sales = item.Value.Sales,
+                    Revenue = item.Value.Revenue,
+                    Trend = item.Value.Sales >= (previousSales?.GetValueOrDefault(item.Key)?.Sales ?? 0) ? "up" : "down",
                 })
                 .OrderByDescending(item => item.Revenue)
                 .ToList();
@@ -499,8 +500,19 @@ public class DashboardService : IDashboardService
     private static string GetProductStatus(Product product)
     {
         if (product.StockQuantity <= 0) return "out of stock";
-        if (product.StockQuantity <= 20) return "low stock";
+        if (product.StockQuantity <= LowStockLimit) return "low stock";
         return "in stock";
+    }
+
+    private static bool IsTopProductMonthInScope(DateTime date, int selectedYear, int? selectedMonth)
+    {
+        if (!selectedMonth.HasValue) return date.Year == selectedYear;
+
+        var previousMonth = selectedMonth.Value == 1 ? 12 : selectedMonth.Value - 1;
+        var previousYear = selectedMonth.Value == 1 ? selectedYear - 1 : selectedYear;
+
+        return (date.Year == selectedYear && date.Month == selectedMonth.Value)
+            || (date.Year == previousYear && date.Month == previousMonth);
     }
 
     private static int? NormalizeMonth(int? month)
