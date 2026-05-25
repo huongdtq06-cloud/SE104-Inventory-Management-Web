@@ -1,15 +1,17 @@
 services:
   frontend:
-    image: ${FRONTEND_IMAGE}
-    pull_policy: always
+    build:
+      context: ./Frontend
+      dockerfile: dockerfile
     ports:
       - "5173:5173"
     depends_on:
       - backend
 
   backend:
-    image: ${BACKEND_IMAGE}
-    pull_policy: always
+    build:
+      context: ./BackendAPI
+      dockerfile: dockerfile
     ports:
       - "5074:5074"
     volumes:
